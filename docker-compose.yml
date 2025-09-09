@@ -1,0 +1,110 @@
+services:
+  mysql:
+    image: mysql:8.1
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  mongodb:
+    image: mongo:6.0
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: medilabo
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+      - ./init-mongodb.js:/docker-entrypoint-initdb.d/init-mongodb.js:ro
+
+  gateway:
+    build: ./backend/gateway
+    restart: always
+    environment:
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      GATEWAY_INTERNAL_PORT: ${GATEWAY_INTERNAL_PORT}
+      USER_MS_HOST: ${USER_MS_HOST}
+      USER_MS_INTERNAL_PORT: ${USER_MS_INTERNAL_PORT}
+      USER_MS_URI: ${USER_MS_URI}
+      NOTE_MS_HOST: ${NOTE_MS_HOST}
+      NOTE_MS_INTERNAL_PORT: ${NOTE_MS_INTERNAL_PORT}
+      NOTE_MS_URI: ${NOTE_MS_URI}
+      EVALUATION_MS_HOST: ${EVALUATION_MS_HOST}
+      EVALUATION_MS_INTERNAL_PORT: ${EVALUATION_MS_INTERNAL_PORT}
+      EVALUATION_MS_URI: ${EVALUATION_MS_URI}
+    depends_on:
+      - user-ms
+      - note-ms
+      - evaluation-ms
+    ports:
+      - "${GATEWAY_EXTERNAL_PORT}:${GATEWAY_INTERNAL_PORT}"
+
+  user-ms:
+    build: 
+      context: ./backend/services/user-ms
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      USER_MS_INTERNAL_PORT: ${USER_MS_INTERNAL_PORT}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_INTERNAL_PORT: ${MYSQL_INTERNAL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      JWT_EXPIRATION_TIME: ${JWT_EXPIRATION_TIME}
+    depends_on:
+      - mysql
+
+  note-ms:
+    build: 
+      context: ./backend/services/note-ms
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INTERNAL_PORT: ${MONGO_INTERNAL_PORT}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      NOTE_MS_INTERNAL_PORT: ${NOTE_MS_INTERNAL_PORT}
+      USER_MS_URL: http://${USER_MS_HOST}:${USER_MS_INTERNAL_PORT}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+    depends_on:
+      - mongodb
+      - user-ms
+
+  evaluation-ms:
+    build: 
+      context: ./backend/services/evaluation-ms
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      EVALUATION_MS_INTERNAL_PORT: ${EVALUATION_MS_INTERNAL_PORT}
+      USER_MS_URL: http://${USER_MS_HOST}:${USER_MS_INTERNAL_PORT}
+      NOTE_MS_URL: http://${NOTE_MS_HOST}:${NOTE_MS_INTERNAL_PORT}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+    depends_on:
+      - user-ms
+      - note-ms
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_URL: "http://localhost:8080"
+        REACT_APP_USER_MS: "/api/users"
+        REACT_APP_NOTE_MS: "/api/notes"
+        REACT_APP_EVALUATION_MS: "/api/evaluation"
+    restart: always
+    ports:
+      - "${FRONTEND_EXTERNAL_PORT}:${FRONTEND_INTERNAL_PORT}"
+
+volumes:
+  mysql_data:
+  mongo_data:

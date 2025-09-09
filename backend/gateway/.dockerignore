@@ -1,0 +1,24 @@
+# Maven / Gradle build
+target
+build
+out
+
+# IntelliJ / IDE
+.idea
+*.iml
+*.ipr
+*.iws
+.vscode
+
+# Logs
+*.log
+logs
+*.tmp
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore

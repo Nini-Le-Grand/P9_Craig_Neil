@@ -1,0 +1,34 @@
+server:
+  port: ${GATEWAY_INTERNAL_PORT}
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: ${USER_MS_HOST}
+              uri: http://${USER_MS_HOST}:${USER_MS_INTERNAL_PORT}
+              predicates:
+                - Path=${USER_MS_URI}
+              filters:
+                - StripPrefix=2
+
+            - id: ${NOTE_MS_HOST}
+              uri: http://${NOTE_MS_HOST}:${NOTE_MS_INTERNAL_PORT}
+              predicates:
+                - Path=${NOTE_MS_URI}
+              filters:
+                - StripPrefix=2
+
+            - id: ${EVALUATION_MS_HOST}
+              uri: http://${EVALUATION_MS_HOST}:${EVALUATION_MS_INTERNAL_PORT}
+              predicates:
+                - Path=${EVALUATION_MS_URI}
+              filters:
+                - StripPrefix=2
+
+app:
+  secret-key: ${APP_SECRET_KEY}
