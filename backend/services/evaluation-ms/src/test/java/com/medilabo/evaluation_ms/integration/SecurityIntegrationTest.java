@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yml")
 class SecurityIntegrationTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private JwtUtils jwtUtils;
@@ -78,14 +81,14 @@ class SecurityIntegrationTest {
     void whenUnknownEndpoint_thenNotFound() throws Exception {
         String token = jwtUtils.generateToken("USER", 36000L);
 
-        mockMvc.perform(get("/someEndpoint")
+        mockMvc.perform(get("/some/endpoint")
                                 .header("Authorization", "Bearer " + token))
                .andExpectAll(
                        status().isNotFound(),
                        jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()),
                        jsonPath("$.error").value(HttpStatus.NOT_FOUND.name()),
                        jsonPath("$.message").value("Route inexistante"),
-                       jsonPath("$.path").value("/someEndpoint")
+                       jsonPath("$.path").value("/some/endpoint")
                );
     }
 }

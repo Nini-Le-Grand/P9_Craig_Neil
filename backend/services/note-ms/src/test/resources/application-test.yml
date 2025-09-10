@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: note_ms-test
+  data:
+    mongodb:
+      database: testdb
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 6.0.6
+
+
+app:
+  secret-key: thisisakeythathasexactly32char!!
+
+server:
+  port: 0
+
+user:
+  ms:
+    url: http://localhost:8081

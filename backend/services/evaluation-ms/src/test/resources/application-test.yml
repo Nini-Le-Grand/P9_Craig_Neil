@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: evaluation_ms
+
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+  web:
+    resources:
+      add-mappings: false
+
+app:
+  secret-key: thisisakeythathasexactly32char!!
+
+user:
+  ms:
+    url: http://localhost:8081
+note:
+  ms:
+    url: http://localhost:8082
+
+server:
+  port: 8083

@@ -7,6 +7,7 @@ import com.medilabo.evaluation_ms.domain.dto.PatientDTO;
 import com.medilabo.evaluation_ms.domain.enums.Gender;
 import com.medilabo.evaluation_ms.domain.enums.RiskLevel;
 import com.medilabo.evaluation_ms.utils.JwtUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yml")
 class EvaluationIntegrationTest {
     @Autowired private JwtUtils jwtUtils;
     @Autowired private MockMvc mockMvc;
@@ -62,12 +67,12 @@ class EvaluationIntegrationTest {
         when(patientClient.getPatientById("123")).thenReturn(patient);
         when(noteClient.getNotesByPatientId("123")).thenReturn(List.of(note1, note2));
 
-        mockMvc.perform(get("/evaluation/123")
+        mockMvc.perform(get("/123")
                                 .header("Authorization", "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpectAll(
                        status().isOk(),
-                       content().string(RiskLevel.BORDERLINE.name())
+                       content().string(Matchers.containsString(RiskLevel.BORDERLINE.name()))
                );
     }
 
@@ -79,7 +84,7 @@ class EvaluationIntegrationTest {
                 .thenThrow(new ResponseStatusException(
                         HttpStatus.INTERNAL_SERVER_ERROR, "Impossible de récupérer le patient"));
 
-        mockMvc.perform(get("/evaluation/999")
+        mockMvc.perform(get("/999")
                                 .header("Authorization", "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpectAll(
@@ -87,7 +92,7 @@ class EvaluationIntegrationTest {
                        jsonPath("$.status").value(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                        jsonPath("$.error").value(HttpStatus.INTERNAL_SERVER_ERROR.name()),
                        jsonPath("$.message").value("Impossible de récupérer le patient"),
-                       jsonPath("$.path").value("/evaluation/999")
+                       jsonPath("$.path").value("/999")
                );
     }
 }

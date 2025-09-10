@@ -11,6 +11,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -18,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yml")
 class CustomFilterTest {
     @Autowired private JwtUtils jwtUtils;
     private TestableCustomFilter filter;
@@ -45,7 +49,7 @@ class CustomFilterTest {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth, "Authentication should not be null");
-        assertEquals(123L, auth.getPrincipal(), "Principal should match userId");
+        assertEquals("123", auth.getPrincipal(), "Principal should match userId");
         assertTrue(auth.getAuthorities().stream()
                        .anyMatch(a -> a.getAuthority().equals("ROLE_USER")), "Authority ROLE_USER should be present");
 
@@ -67,7 +71,7 @@ class CustomFilterTest {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth, "Authentication should not be null");
-        assertEquals(123L, auth.getPrincipal(), "Principal should match userId");
+        assertEquals("123", auth.getPrincipal(), "Principal should match userId");
         assertTrue(auth.getAuthorities().stream()
                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")), "Authority ROLE_ADMIN should be present");
 
