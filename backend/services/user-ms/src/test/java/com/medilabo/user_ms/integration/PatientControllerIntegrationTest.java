@@ -124,7 +124,7 @@ class PatientControllerIntegrationTest {
     @WithMockUser(username = "doc@example.com", roles = {"USER"})
     void shouldNotAddPatientWithDuplicateEmail() throws Exception {
         PatientDTO patient1 = samplePatientDTO();
-        PatientDTO patient2 = samplePatientDTO(); // même email
+        PatientDTO patient2 = samplePatientDTO();
 
         mockMvc.perform(post("/patients")
                                 .contentType(MediaType.APPLICATION_JSON)

@@ -33,7 +33,7 @@ public class CustomFilter extends OncePerRequestFilter {
     private UserRepository userRepository;
 
     @Value("${app.secret-key}")
-    private String secretKey;
+    protected String secretKey;
 
     /**
      * Filters incoming requests to authenticate users based on JWT token.

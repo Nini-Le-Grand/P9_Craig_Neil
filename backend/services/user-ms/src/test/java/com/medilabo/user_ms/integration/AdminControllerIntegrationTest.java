@@ -66,13 +66,11 @@ class AdminControllerIntegrationTest {
     @Test
     @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
     void shouldSearchUsers() throws Exception {
-        // Créer un utilisateur
         mockMvc.perform(post("/admin/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(sampleUser)))
                .andExpect(status().isOk());
 
-        // Rechercher par prénom
         mockMvc.perform(get("/admin/users/search")
                                 .param("keyword", "John"))
                .andExpect(status().isOk())

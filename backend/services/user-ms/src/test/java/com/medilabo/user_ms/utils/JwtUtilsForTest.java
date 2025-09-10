@@ -11,13 +11,13 @@ import java.util.Map;
 @Service
 public class JwtUtilsForTest {
     private static final String SECRET_KEY = "thisisakeythathasexactly32char!!";
-    public String generateToken(String role, long expirationTime) {
+    public String generateToken(String subject, String role, long expirationTime) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
 
         return Jwts.builder()
                    .claims(claims)
-                   .subject("123")
+                   .subject(subject)
                    .issuedAt(new Date())
                    .expiration(new Date(System.currentTimeMillis() + expirationTime))
                    .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
